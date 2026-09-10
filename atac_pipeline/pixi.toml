@@ -1,0 +1,30 @@
+[workspace]
+name = "atac-to-bam"
+version = "0.1.0"
+description = "ATAC-seq FASTQ -> mouse GRCm39 (Ensembl 116) filtered BAM pipeline"
+authors = ["oneusecase@gmail.com"]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+# Python 3.12 as requested, plus the command-line tools the script drives.
+[dependencies]
+python  = "3.12.*"
+bowtie2 = ">=2.5.4"      # aligner (ENCODE-style ATAC settings)
+samtools = ">=1.21"      # fixmate / sort / markdup / filter / index / stats
+fastp   = ">=0.24.0"     # adapter + quality trimming, auto Nextera detection
+pigz    = ">=2.8"        # parallel gzip / decompression
+curl    = ">=8.0"        # reference download (resumable)
+
+# MultiQC is optional (nice HTML summary of fastp + samtools stats).
+# Comment this line out if the solve is slow or conflicts on your machine.
+multiqc = ">=1.25"
+
+# Only used by the optional pre-alignment QC helper (scripts/fastq_qc via the
+# exploratory-data-analysis skill); not needed for BAM generation itself.
+biopython = ">=1.84"
+
+[tasks]
+# `pixi run pipeline --fastq-dir ../sandbox`  (args are forwarded)
+pipeline = "python atac_to_bam.py"
+# `pixi run tools` -> quick check that every binary resolved
+tools = "bash -c 'for t in bowtie2 bowtie2-build samtools fastp pigz curl multiqc; do printf \"%-16s\" $t; command -v $t || echo MISSING; done'"
