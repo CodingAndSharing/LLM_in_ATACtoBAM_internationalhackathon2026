@@ -46,3 +46,26 @@ bam/
 # Temporary files
 *.tmp
 
+
+# Sequencing data
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# Alignment files
+*.bam
+*.bam.bai
+*.sam
+*.cram
+*.crai
+
+# Reference genomes and alignment indexes
+reference/*.fa
+reference/*.fasta
+reference/*.fa.gz
+reference/*.bt2
+reference/*.bt2l
+
+# Temporary/intermediate files
+trimmed/
