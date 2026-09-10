@@ -1,0 +1,39 @@
+Name: Joseph Imobio
+
+Experience with Sequencing data: little to no experience with sequencing data
+
+Experience with coding: 2 plus years in full stack development and machine learning 
+
+Experience with using llms: i have experience with llm's with chat interface angentic cli llms , base model llm's and useing llm approximately
+
+Did I ask it to run a QC program: No I did not ask it to do that, I asked how you would use QC to analyze the datasets and it gave the workflows ad the commands 
+
+
+the LLM i'M using is GBT5.6
+
+The prompt I gave is : 
+"
+how would i use qc to analyze these datasets give steps in a conda enviroment  
+
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/020/SRR11878620/SRR11878620_1.fastq.gz -o SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/020/SRR11878620/SRR11878620_2.fastq.gz -o SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/019/SRR11878619/SRR11878619_1.fastq.gz -o SRR11878619_GSM4579144_mESC_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR118/019/SRR11878619/SRR11878619_2.fastq.gz -o SRR11878619_GSM4579144_mESC_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR989/004/SRR9894854/SRR9894854_1.fastq.gz -o SRR9894854_GSM4005240_NPC48h_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR989/004/SRR9894854/SRR9894854_2.fastq.gz -o SRR9894854_GSM4005240_NPC48h_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_2.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR989/005/SRR9894855/SRR9894855_1.fastq.gz -o SRR9894855_GSM4005241_NPC48h_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1.fastq.gz
+curl -L ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR989/005/SRR9894855/SRR9894855_2.fastq.gz -o SRR9894855_GSM4005241_NPC48h_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2.fastq.gz
+
+"
+
+then it gave the steps and scripts to download and run 
+
+
+does the script run successfully: yes it does
+
+It did not require further scrips to get the qc done but it needed further instruction to create the bowtie2, reference and bam
+
+
+  git config --global user.email "josephimobio2@gmail.com"
+  git config --global user.name "j042699"
+

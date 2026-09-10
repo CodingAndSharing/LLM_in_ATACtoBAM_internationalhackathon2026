@@ -1,0 +1,440 @@
+Mouse ATAC-seq Quality Control Workflow
+
+
+1. Objective
+
+The aim is to perform quality control on four paired-end mouse ATAC-seq datasets:
+
+SRR11878619 — mESC DMSO replicate 1
+SRR11878620 — mESC DMSO replicate 2
+SRR9894854 — NPC48h DMSO replicate 1
+SRR9894855 — NPC48h DMSO replicate 2
+
+The workflow includes raw-read QC, adapter trimming, alignment, ATAC-seq-specific QC, peak calling, and biological replicate comparison.
+
+2. Create the Project Directories
+mkdir -p mouse_ATAC/{fastq,qc_raw,qc_trimmed,trimmed,reference,bam,peaks,qc_atac}
+cd mouse_ATAC
+
+
+Move the downloaded FASTQ files into the fastq directory:
+
+mv *.fastq.gz fastq/
+
+
+Check the files:
+
+ls fastq/
+
+3. Create a Conda Environment
+
+Configure the Bioconda channels:
+
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda config --set channel_priority strict
+
+
+Create the environment:
+
+conda create -n atacqc \
+    python=3.11 \
+    fastqc \
+    multiqc \
+    fastp \
+    trim-galore \
+    bowtie2 \
+    samtools \
+    bedtools \
+    picard \
+    macs2 \
+    deeptools \
+    subread \
+    -y
+
+
+Activate it:
+
+conda activate atacqc
+
+
+Check that the software is installed:
+
+fastqc --version
+multiqc --version
+fastp --version
+trim_galore --version
+bowtie2 --version
+samtools --version
+macs2 --version
+
+4. Check FASTQ File Integrity
+
+Check that the compressed FASTQ files are not corrupted:
+
+gzip -t fastq/*.fastq.gz
+
+
+Count the reads in each FASTQ:
+
+for f in fastq/*.fastq.gz
+do
+    echo "$f"
+    zcat "$f" | awk 'END {print "Reads:", NR/4}'
+done
+
+
+R1 and R2 should contain approximately the same number of reads for each sample.
+
+5. Raw FASTQ Quality Control with FastQC
+
+Run FastQC on all raw FASTQ files:
+
+fastqc \
+    -t 8 \
+    -o qc_raw \
+    fastq/*.fastq.gz
+
+
+FastQC should be used to examine:
+
+Per-base quality
+Per-sequence quality
+GC content
+Adapter contamination
+Sequence duplication
+Overrepresented sequences
+6. Combine Raw QC with MultiQC
+
+Create one summary report:
+
+multiqc qc_raw \
+    -o qc_raw \
+    -n multiqc_raw.html
+
+
+The resulting multiqc_raw.html report can be opened in a web browser.
+
+7. Adapter Trimming
+
+ATAC-seq libraries can contain adapter sequences, particularly when short DNA fragments have been sequenced. Trim Galore can be used for paired-end adapter removal.
+
+For example:
+
+trim_galore \
+    --paired \
+    --fastqc \
+    --cores 8 \
+    -o trimmed \
+    fastq/SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1.fastq.gz \
+    fastq/SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2.fastq.gz
+
+
+Instead of running the command manually for every sample, all four samples can be processed using:
+
+for r1 in fastq/*_1.fastq.gz
+do
+    r2="${r1/_1.fastq.gz/_2.fastq.gz}"
+
+    trim_galore \
+        --paired \
+        --fastqc \
+        --cores 8 \
+        -o trimmed \
+        "$r1" "$r2"
+done
+
+
+Check the output:
+
+ls trimmed/
+
+8. QC After Trimming
+
+Run MultiQC on the trimming results:
+
+multiqc trimmed \
+    -o qc_trimmed \
+    -n multiqc_trimmed.html
+
+
+The post-trimming QC should show reduced adapter contamination without excessive loss of reads.
+
+9. Prepare the Mouse Reference Genome
+
+Use one consistent mouse genome assembly throughout the analysis, such as mm10/GRCm38 or mm39/GRCm39.
+
+For example, create the mm10 directory:
+
+mkdir -p reference/mm10
+
+
+After obtaining the mouse reference FASTA:
+
+samtools faidx reference/mm10/mm10.fa
+
+
+Build the Bowtie2 index:
+
+bowtie2-build \
+    reference/mm10/mm10.fa \
+    reference/mm10/mm10
+
+
+The same genome assembly should be used for the FASTA, annotation, blacklist, TSS file, chromosome sizes, and downstream analysis.
+
+10. Align the Trimmed Reads
+
+For example, alignment of SRR11878620:
+
+bowtie2 \
+    -x reference/mm10/mm10 \
+    -1 trimmed/SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1_val_1.fq.gz \
+    -2 trimmed/SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2_val_2.fq.gz \
+    -p 8 \
+    2> bam/SRR11878620_bowtie2.log \
+| samtools view -bS - \
+| samtools sort -@ 8 -o bam/SRR11878620.sorted.bam
+
+
+Index the BAM:
+
+samtools index bam/SRR11878620.sorted.bam
+
+
+The same process should be performed for all four samples.
+
+11. Alignment QC
+
+Use Samtools to examine alignment statistics:
+
+samtools flagstat bam/SRR11878620.sorted.bam
+
+
+Repeat for the other samples:
+
+samtools flagstat bam/SRR11878619.sorted.bam
+samtools flagstat bam/SRR9894854.sorted.bam
+samtools flagstat bam/SRR9894855.sorted.bam
+
+
+Important metrics include:
+
+Total reads
+Mapping percentage
+Properly paired reads
+Unmapped reads
+Alignment quality
+
+The four samples should have reasonably consistent alignment statistics.
+
+12. Check Mitochondrial Reads
+
+For mm10, mitochondrial reads are generally located on chrM.
+
+Check them using:
+
+samtools idxstats bam/SRR11878620.sorted.bam | grep chrM
+
+
+The mitochondrial percentage should be assessed for every sample. Very high mitochondrial contamination can indicate a poor ATAC-seq library.
+
+13. Mark PCR Duplicates
+
+Use Picard:
+
+picard MarkDuplicates \
+    I=bam/SRR11878620.sorted.bam \
+    O=bam/SRR11878620.markdup.bam \
+    M=bam/SRR11878620.duplicate_metrics.txt
+
+
+Index the resulting BAM:
+
+samtools index bam/SRR11878620.markdup.bam
+
+
+View duplicate metrics:
+
+cat bam/SRR11878620.duplicate_metrics.txt
+
+
+Repeat for all samples.
+
+Duplicate levels should be interpreted together with library complexity and other ATAC-seq QC measurements rather than being considered a failure by themselves.
+
+14. ATAC-seq Fragment-Size QC
+
+Examine the fragment-size distribution of the aligned reads.
+
+Good ATAC-seq libraries commonly show patterns corresponding to:
+
+Nucleosome-free fragments
+Mononucleosome fragments
+Dinucleosome fragments
+Larger nucleosomal fragments
+
+A periodic/nucleosomal pattern is generally evidence of a good ATAC-seq library.
+
+The specialized ATAC-seq QC program ataqv can also be used for this analysis.
+
+15. TSS Enrichment
+
+TSS enrichment measures ATAC-seq signal around transcription start sites.
+
+Using deepTools:
+
+computeMatrix reference-point \
+    -S sample.bw \
+    -R mouse_TSS.bed \
+    --referencePoint TSS \
+    -b 2000 \
+    -a 2000 \
+    -o tss_matrix.gz
+
+
+Plot the TSS profile:
+
+plotProfile \
+    -m tss_matrix.gz \
+    -out tss_profile.png
+
+
+Good ATAC-seq data should show enrichment around TSS regions.
+
+16. Generate Signal Tracks
+
+Create normalized BigWig files using deepTools:
+
+bamCoverage \
+    -b bam/SRR11878620.filtered.bam \
+    -o bam/SRR11878620.bw \
+    --normalizeUsing CPM \
+    --binSize 10 \
+    -p 8
+
+
+This should be performed for all four samples.
+
+17. Peak Calling with MACS2
+
+MACS2 can be used to identify accessible chromatin regions:
+
+macs2 callpeak \
+    -t bam/SRR11878620.filtered.bam \
+    -f BAMPE \
+    -g mm \
+    -n SRR11878620 \
+    --outdir peaks/SRR11878620
+
+
+Repeat for all four samples.
+
+FRiP, or Fraction of Reads in Peaks, can then be calculated to determine how many usable fragments overlap called accessible regions.
+
+18. Biological Replicate Correlation
+
+The two mESC replicates should be compared with each other, and the two NPC48h replicates should be compared with each other.
+
+First create a summary matrix:
+
+multiBigwigSummary bins \
+    -b \
+    bam/SRR11878620.bw \
+    bam/SRR11878619.bw \
+    bam/SRR9894854.bw \
+    bam/SRR9894855.bw \
+    -o qc_atac/summary.npz \
+    --outRawCounts qc_atac/summary.tsv \
+    -p 8
+
+
+Generate a correlation heatmap:
+
+plotCorrelation \
+    -in qc_atac/summary.npz \
+    --corMethod spearman \
+    --whatToPlot heatmap \
+    --plotNumbers \
+    -o qc_atac/correlation_heatmap.png
+
+
+Generate a PCA plot:
+
+plotPCA \
+    -in qc_atac/summary.npz \
+    -o qc_atac/PCA.png
+
+
+Ideally, the mESC replicates should cluster together and the NPC48h replicates should cluster together. PCA should also help determine whether the biological states are clearly separated.
+
+19. Final MultiQC Report
+
+After completing the QC analyses, a final MultiQC report can be generated:
+
+multiqc . \
+    -o final_qc \
+    -n ATACseq_MultiQC.html
+
+
+The final QC assessment should consider:
+
+Raw read quality
+Adapter contamination
+Mapping rate
+Proper pairing
+Mitochondrial reads
+Duplicate rate
+Library complexity
+Fragment-size distribution
+TSS enrichment
+FRiP
+Peak numbers
+Replicate correlation
+PCA/clustering
+20. Overall Workflow
+
+The complete workflow is:
+
+Download FASTQ files
+        ↓
+Check FASTQ integrity
+        ↓
+FastQC
+        ↓
+MultiQC
+        ↓
+Adapter trimming with Trim Galore
+        ↓
+FastQC + MultiQC
+        ↓
+Mouse genome alignment with Bowtie2
+        ↓
+Samtools alignment QC
+        ↓
+Mitochondrial read assessment
+        ↓
+Duplicate assessment
+        ↓
+Fragment-size analysis
+        ↓
+TSS enrichment
+        ↓
+Peak calling with MACS2
+        ↓
+FRiP calculation
+        ↓
+Correlation and PCA
+        ↓
+Final MultiQC report
+
+Conclusion
+
+This workflow provides both general sequencing QC and ATAC-seq-specific quality assessment. The most important criteria are good sequencing quality, low adapter contamination, good mapping, acceptable mitochondrial and duplicate levels, appropriate ATAC-seq fragment-size patterns, strong TSS enrichment, good FRiP, and high reproducibility between biological replicates.
+
+For a fully automated and reproducible analysis, the nf-core ATAC-seq workflow can also be used instead of manually running each individual step.
+
+
+
+
+

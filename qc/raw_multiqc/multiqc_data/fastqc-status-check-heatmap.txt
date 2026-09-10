@@ -1,0 +1,9 @@
+.	Basic Statistics	Per Base Sequence Quality	Per Sequence Quality Scores	Per Base Sequence Content	Per Sequence GC Content	Per Base N Content	Sequence Length Distribution	Sequence Duplication Levels	Overrepresented Sequences	Adapter Content
+SRR11878619_GSM4579144_mESC_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_1	1	1	1	0.25	1	1	1	0.5	1	0.25
+SRR11878619_GSM4579144_mESC_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_2	1	1	1	0.25	0.5	1	1	0.5	1	0.25
+SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1	1	1	1	0.25	0.5	1	1	0.5	1	0.25
+SRR11878620_GSM4579145_mESC_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2	1	1	1	0.25	1	1	1	0.5	1	0.25
+SRR9894854_GSM4005240_NPC48h_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_1	1	1	1	0.5	1	1	1	1	1	0.25
+SRR9894854_GSM4005240_NPC48h_DMSO_ATAC_rep1_Mus_musculus_ATAC-seq_2	1	1	1	0.5	1	1	1	1	1	0.25
+SRR9894855_GSM4005241_NPC48h_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_1	1	1	1	0.5	1	1	1	1	1	0.25
+SRR9894855_GSM4005241_NPC48h_DMSO_ATAC_rep2_Mus_musculus_ATAC-seq_2	1	1	1	0.5	1	1	1	1	1	0.25
