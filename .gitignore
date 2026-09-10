@@ -1,2 +1,48 @@
 # Sequencing data
+*.fastq
 *.fastq.gz
+*.fq
+*.fq.gz
+
+# Reference genomes
+*.fa
+*.fasta
+*.fna
+*.fa.gz
+*.fasta.gz
+*.fna.gz
+
+# Bowtie2 index files
+*.bt2
+*.b2
+
+# Alignment files
+*.bam
+*.bam.bai
+*.sam
+
+# QC output
+qc/
+qc_raw/
+qc_trimmed/
+qc_atac/
+final_qc/
+
+# Trimmed reads
+trimmed/
+
+# Peak/output files
+peaks/
+
+# Reference directory
+reference/
+
+# BAM directory
+bam/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
