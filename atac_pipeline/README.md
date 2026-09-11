@@ -332,3 +332,31 @@ pairs each) are valid and ready for MACS2/MACS3 peak calling, Tn5 shift, and
 fragment-size QC — just shallow, because the input was downsampled and roughly
 half of it is unmappable adapter/low-complexity content. If you need more usable
 depth, go back to the non-downsampled runs; the pipeline itself needs no change.
+
+---
+
+## 9. Second run — 2026-09-11 (2 more samples added to `../sandbox/`)
+
+Two more mouse ATAC-seq samples landed in `../sandbox/`: **SRR9894854 /
+GSM4005240** and **SRR9894855 / GSM4005241** (NPC48h DMSO, rep1/rep2, 75 bp
+reads). Re-ran scoped to just the new samples (`--samples ...`) so the
+already-finished rep1/rep2 above weren't reprocessed; the existing GRCm39
+genome + bowtie2 index in `../reference/` were reused as-is (no re-download,
+no rebuild — confirmed from the run log). All four samples' filtered BAMs and
+QC now live together in `../scripts_output/`, and `multiqc_report.html` was
+regenerated to cover all four.
+
+| | rep1 (SRR9894854) | rep2 (SRR9894855) |
+|---|---|---|
+| Input read pairs | 5,119,261 | 3,238,820 |
+| **bowtie2 overall alignment rate** | **99.0 %** | **99.1 %** |
+| Duplicate rate (of mapped) | 6.8 % | 4.7 % |
+| **`*.filtered.bam` reads (pairs)** | **7,386,684 (3,693,342)** | **4,808,600 (2,404,300)** |
+| MT reads in filtered BAM | 0 | 0 |
+| `samtools quickcheck` | ✅ | ✅ |
+
+This is a useful confirmation of the §8 diagnosis: **same pipeline, same
+reference index, same day** — but this pair of samples aligns at ~99% instead
+of ~48%. That rules out anything pipeline-side for the first two samples;
+the earlier shortfall really was specific to that library's adapter-dimer /
+low-complexity content, not a bug or a misconfigured reference.
