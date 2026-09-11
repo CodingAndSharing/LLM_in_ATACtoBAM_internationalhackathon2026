@@ -69,3 +69,8 @@ reference/*.bt2l
 
 # Temporary/intermediate files
 trimmed/
+
+# Large genome reference/index files
+reference/mm10.fa
+reference/mm10.*.bt2
+reference/mm10.rev.*.bt2
