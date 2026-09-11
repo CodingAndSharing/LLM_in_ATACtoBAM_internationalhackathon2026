@@ -22,6 +22,7 @@ multiqc = ">=1.25"
 # Only used by the optional pre-alignment QC helper (scripts/fastq_qc via the
 # exploratory-data-analysis skill); not needed for BAM generation itself.
 biopython = ">=1.84"
+fastq-screen = "0.16.0.*"
 
 [tasks]
 # `pixi run pipeline --fastq-dir ../sandbox`  (args are forwarded)

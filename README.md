@@ -21,9 +21,11 @@ _Claude Code loads project skills from .claude/skills/ in the directory where yo
 ```
 Use available skills you have access to whenever possible. 
 task: I would like to process some ATAC-Seq data (that lives in the sandbox folder in this project), can you please write me a python script to generate bam files mapped to the mouse genome Mus_musculus.GRCm39.116.gtf.gz. Note: use a pixi environment to use python 3.12 and write also a README.md to see the steps and the compute requirements before starting with this task. 
+
+
 ```
 
-**Skills Used**: exploratory-data-analysis, database-lookup, genomic-coordinates, genomic-intelligence, bulk-rnaseq
+**Skills Used**: exploratory-data-analysis, database-lookup, genomic-coordinates, genomic-intelligence, bulk-rnaseq, fastq-screen
 
 ---
 

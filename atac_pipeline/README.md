@@ -358,5 +358,33 @@ regenerated to cover all four.
 This is a useful confirmation of the §8 diagnosis: **same pipeline, same
 reference index, same day** — but this pair of samples aligns at ~99% instead
 of ~48%. That rules out anything pipeline-side for the first two samples;
-the earlier shortfall really was specific to that library's adapter-dimer /
-low-complexity content, not a bug or a misconfigured reference.
+the earlier shortfall really was specific to that library's content, not a
+bug or a misconfigured reference. **§10 below refines *what* that content
+is** — adapter dimers/low-complexity reads are only part of the story.
+
+---
+
+## 10. Correction — FastQ Screen found real Mycoplasma contamination in the mESC samples
+
+Using the new `fastq-screen` skill (`.claude/skills/fastq-screen/`), screened
+all 4 samples against Mouse_GRCm39 + PhiX + Adapters + Vectors + a 7-species
+Mycoplasma panel. Full writeup, raw output, and the confirmatory analysis:
+**`../scripts_output/fastq_screen/CONTAMINATION_FINDINGS.md`**.
+
+**Summary: the §8 diagnosis was incomplete, not wrong.** The two mESC samples
+(SRR11878619/620) show **~41% of reads hitting the Mycoplasma panel — more
+than hit Mouse (37–39%)** — while the two NPC samples (SRR9894854/855, the
+~99%-alignment pair from §9) show **0.00%**. Confirmed with a strict
+end-to-end `bowtie2 --sensitive` re-alignment (not FastQ Screen's permissive
+fast/local default): ~32% of raw reads align at ~98% identity, full-length,
+**100% concentrated on one contig — *Mesomycoplasma (Mycoplasma) hyorhinis*,
+the most common cell-culture mycoplasma species in real-world surveys** —
+not diffusely across the panel, and zero reads align to both Mouse and
+Mycoplasma. This explains **~45% of the reads that don't map to mouse**; the
+remaining ~40% of all reads still fit the original adapter-dimer/
+low-complexity explanation. Both are real, simultaneously.
+
+**No impact on the delivered BAMs**: Mycoplasma reads don't align to mouse,
+so the filtering step already excludes them as unmapped — `*.filtered.bam`
+content is unchanged. This is a wet-lab finding (the mESC culture/reagents
+likely need mycoplasma testing and treatment), not a bioinformatics fix.
