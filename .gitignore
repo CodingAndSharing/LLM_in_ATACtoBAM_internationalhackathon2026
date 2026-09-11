@@ -21,12 +21,7 @@
 *.bam.bai
 *.sam
 
-# QC output
-qc/
-qc_raw/
-qc_trimmed/
-qc_atac/
-final_qc/
+
 
 # Trimmed reads
 trimmed/
